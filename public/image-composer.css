@@ -1,0 +1,251 @@
+.image-composer {
+  margin: 0 0 22px;
+  padding: 16px;
+  border: 1px solid #cfd7ff;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--soft) 52%, var(--panel));
+}
+
+.image-composer-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.image-composer-head::-webkit-details-marker { display: none; }
+
+.image-composer-head::after {
+  content: "⌄";
+  flex: 0 0 auto;
+  margin-left: 4px;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.image-composer[open] .image-composer-head::after { content: "⌃"; }
+
+.image-composer[open] .image-composer-head { margin-bottom: 9px; }
+
+.image-composer-head span,
+.composition-result span {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.image-composer-head h3 {
+  margin: 3px 0 0;
+  font-size: 17px;
+}
+
+.image-composer-head > div:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.image-composer-head small,
+.image-composer-head strong {
+  display: block;
+}
+
+.image-composer-head small {
+  color: var(--muted);
+}
+
+.image-composition-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.image-composition-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+.image-composition-form legend {
+  padding: 0 5px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.composition-source-library {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 5px;
+  max-height: 166px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.composition-source-option {
+  position: relative;
+  min-width: 0;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.composition-source-option.selected {
+  border-color: var(--accent);
+  background: var(--soft);
+  color: var(--accent);
+}
+
+.composition-source-option img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  height: 54px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.composition-source-option span,
+.composition-source-option small {
+  display: block;
+  overflow: hidden;
+  padding: 4px 1px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composition-source-option span {
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.composition-source-option small {
+  display: none;
+}
+
+.composition-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compose-image-button {
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.compose-image-button:disabled {
+  background: #b9becb;
+  cursor: not-allowed;
+}
+
+.composition-result {
+  display: grid;
+  grid-template-columns: minmax(130px, 42%) 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 10px;
+  border: 2px solid #7c3aed;
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.composition-result > img {
+  width: 100%;
+  max-height: 240px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #111;
+}
+
+.composition-result strong,
+.composition-result small {
+  display: block;
+  margin-top: 4px;
+}
+
+.composition-result small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.composition-result button {
+  margin-top: 12px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.composition-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+#idea-from-composition-button {
+  background: #d97706;
+}
+
+.recent-compositions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.recent-compositions button {
+  flex: 0 0 76px;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--panel);
+  cursor: pointer;
+}
+
+.recent-compositions button.active {
+  border-color: var(--accent);
+}
+
+.recent-compositions img {
+  display: block;
+  width: 68px;
+  height: 52px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.composition-use-status {
+  border-color: #7c3aed;
+}
+
+@media (max-width: 700px) {
+  .composition-source-library { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .composition-settings { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 460px) {
+  .image-composer-head { display: block; }
+  .image-composer-head > div:last-child { margin-top: 8px; text-align: left; }
+  .composition-source-library { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .composition-result { grid-template-columns: 1fr; }
+}

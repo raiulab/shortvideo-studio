@@ -1,0 +1,42 @@
+.cost-history {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.cost-history summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cost-history-content {
+  margin-top: 10px;
+}
+
+.cost-history-content .field-hint {
+  margin: 0 0 6px;
+}
+
+.cost-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.cost-history-table th,
+.cost-history-table td {
+  padding: 7px 5px;
+  border-top: 1px solid var(--line);
+  text-align: right;
+}
+
+.cost-history-table th:first-child {
+  text-align: left;
+}
+
+.cost-history-table thead th {
+  color: var(--muted);
+  font-size: 12px;
+}

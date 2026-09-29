@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Short Yumaker ver.1</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/video-dialog.css">
+  <link rel="stylesheet" href="/generation-mode.css">
+  <link rel="stylesheet" href="/character-profile.css">
+  <link rel="stylesheet" href="/cost-history.css">
+  <link rel="stylesheet" href="/asset-library.css">
+  <link rel="stylesheet" href="/image-composer.css">
+  <link rel="stylesheet" href="/prompt-ideas.css">
+</head>
+<body>
+  <header class="app-header">
+    <div><strong>Shortvideo Studio</strong><span>Short Yumaker ver.1</span></div>
+    <div class="header-status"><span id="theme-status"></span><span id="api-status" class="status">確認中…</span></div>
+  </header>
+  <aside id="vidu-credit-alert" class="provider-credit-alert" role="alert" aria-live="assertive" hidden>
+    <div><strong>Viduクレジットが不足しています</strong><span id="vidu-credit-alert-message">Viduで動画を生成できません。クレジットを補充してから再度お試しください。</span></div>
+    <button id="dismiss-vidu-credit-alert" type="button" aria-label="Viduクレジット不足の通知を閉じる">×</button>
+  </aside>
+  <main>
+    <section class="workspace">
+      <aside class="characters-panel">
+        <div class="section-head">
+          <div><span>STEP 1</span><h2>素材</h2></div>
+          <button id="open-dialog" class="text-button">＋ 追加</button>
+        </div>
+        <div id="character-list" class="character-list"></div>
+      </aside>
+      <section class="creation-panel">
+        <div class="section-head"><div><span>STEP 2</span><h2>動画を作成</h2></div></div>
+        <div id="empty-state" class="empty-state">
+          <div class="quick-upload">
+            <p>画像を1〜3枚アップロードして動画を作成できます。</p>
+            <div id="quick-upload-list" class="quick-upload-list" hidden></div>
+            <button id="quick-upload-button" type="button" class="primary">画像を追加</button>
+            <input id="quick-upload-input" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+            <span id="quick-upload-status" class="field-hint">PNG、JPEG、WebP（1枚8MB以内・合計14MB以内）</span>
+            <details class="quick-registered-library">
+              <summary id="quick-registered-summary">登録素材から選ぶ（アップロード画像と合計3枚まで）</summary>
+              <div id="quick-registered-images" class="quick-registered-images"></div>
+              <p id="quick-registered-hint" class="field-hint">登録済みの画像を動画の参照画像として追加できます。</p>
+            </details>
+            <div class="quick-upload-actions">
+              <button id="quick-upload-next" type="button" class="primary" disabled>動画の設定へ</button>
+            </div>
+          </div>
+        </div>
+        <div id="creator" hidden>
+          <div class="selected-summary">
+            <div><span id="selected-kind-label">SELECTED CHARACTER</span><h3 id="selected-name"></h3><p id="selected-image-count"></p></div>
+          </div>
+          <section class="character-profile" aria-labelledby="character-profile-title">
+            <div class="character-profile-head">
+              <div><span id="character-profile-title">CHARACTER PROFILE</span><p id="character-profile-note">このキャラクターを選んだ動画生成にだけ反映されます。</p></div>
+              <button id="save-character-profile" type="button">設定を保存</button>
+            </div>
+            <label id="character-profile-label">キャラクターの特徴・ペルソナ
+              <textarea id="character-profile-input" rows="4" maxlength="1000" placeholder="例：好奇心旺盛で穏やかな黒猫。片方の目は水色。ゆっくりした所作で、驚いても大げさに騒がない。"></textarea>
+            </label>
+            <p id="character-profile-status" class="field-hint" aria-live="polite">未設定です。</p>
+          </section>
+          <details id="image-composer" class="image-composer">
+            <summary class="image-composer-head">
+              <div><span>SEEDREAM IMAGE COMPOSER</span><h3 id="image-composer-title">複数の素材から動画用画像を合成</h3></div>
+              <div><small>1枚生成</small><strong id="composition-cost">$0.04 / 約¥7</strong></div>
+            </summary>
+            <p class="field-hint">キャラクター、背景・シーン、追加画像を2〜6枚選び、1枚の開始画像に合成します。登録済みの特徴・設定は、選択した素材の分だけ送信されます。</p>
+            <form id="image-composition-form" class="image-composition-form">
+              <fieldset>
+                <legend>合成元の登録画像</legend>
+                <div id="composition-source-library" class="composition-source-library"></div>
+                <p id="composition-source-count" class="field-hint">0/6枚選択中</p>
+              </fieldset>
+              <label>追加画像（任意）
+                <input id="composition-upload-input" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+                <span id="composition-upload-name" class="field-hint">登録画像と合わせて最大6枚、合計18MB以内です。</span>
+              </label>
+              <div id="composition-upload-list" class="reference-upload-list" hidden></div>
+              <label>どのように合成しますか？
+                <textarea name="compositionPrompt" rows="4" maxlength="2000" placeholder="英語推奨。例：Place the character from Image 1 naturally in the rainy street from Image 2. Keep the character's face, clothes, and proportions unchanged. Cinematic wide shot."></textarea>
+              </label>
+              <div class="composition-settings">
+                <label>画像モデル<select name="compositionModel"><option value="seedream-4-5-251128" selected>Seedream 4.5（推奨）</option><option value="seedream-5-0-lite-260128">Seedream 5.0 Lite（低コスト）</option></select></label>
+                <label>画面比率<select name="compositionAspectRatio"><option value="16:9" selected>YouTube・映画向け 16:9</option><option value="1:1">正方形 1:1</option><option value="9:16">TikTok・Shorts向け 9:16</option></select></label>
+              </div>
+              <p id="composition-error" class="error" aria-live="polite"></p>
+              <button id="compose-image-button" type="submit" class="compose-image-button">Seedream 4.5で合成画像を生成</button>
+            </form>
+            <div id="composition-result" class="composition-result" hidden>
+              <img id="composition-result-image" alt="Seedreamで生成した合成画像">
+              <div><span>COMPOSITE READY</span><strong id="composition-result-title">合成画像が完成しました</strong><small id="composition-result-meta"></small><div class="composition-result-actions"><button id="use-composition-button" type="button">この画像を動画に使う</button><button id="idea-from-composition-button" type="button">この画像から動きを考える</button></div></div>
+            </div>
+            <div id="recent-compositions" class="recent-compositions" hidden></div>
+          </details>
+          <fieldset id="source-image-selector" class="source-image-selector">
+            <legend id="source-image-title">最初のイメージを選択</legend>
+            <div id="selected-images" class="selected-images"></div>
+            <p id="source-image-hint" class="field-hint">クリックした登録画像を動画の開始フレームに使います。</p>
+          </fieldset>
+          <details id="temporary-reference-selector" class="temporary-reference-selector" hidden>
+            <summary>登録素材から追加（合計3枚まで）</summary>
+            <input id="temporary-reference-search" type="search" placeholder="素材名で絞り込み">
+            <div id="temporary-reference-images" class="temporary-reference-images"></div>
+            <p id="temporary-reference-hint" class="field-hint">左の登録素材から、動画の参照画像を追加できます。</p>
+          </details>
+          <div id="composition-use-status" class="custom-start-status composition-use-status" hidden>
+            <img id="composition-use-preview" alt="動画に使用する合成画像">
+            <div><span>SEEDREAM START IMAGE</span><strong>合成画像を使用中</strong><small>この画像が動画サービスへ開始画像として送信されます</small></div>
+            <button id="clear-composition-image" type="button">登録画像に戻す</button>
+          </div>
+          <label id="reference-images-field" class="start-image-field" hidden>追加の参照画像（Vidu専用・任意）
+            <input id="reference-images-input" name="referenceImages" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+            <span id="reference-images-name" class="field-hint">登録画像と合わせて最大7枚、合計14MB以内です。</span>
+          </label>
+          <div id="reference-upload-list" class="reference-upload-list" hidden></div>
+          <div id="image-notice" class="notice" hidden>動画生成には元画像が必要です。左の「画像＋」から1～15枚登録してください。</div>
+          <form id="generation-form">
+            <details id="prompt-idea-panel" class="prompt-idea-panel">
+              <summary class="prompt-idea-head"><div><span>IDEA WRITER</span><h3 id="prompt-idea-title">動画プロンプトを自動作成</h3></div><small id="prompt-idea-source">選択中の登録画像から考えます</small></summary>
+              <label id="prompt-idea-start-frame-field" class="prompt-idea-start-frame-field">開始フレーム画像（任意）
+                <input id="prompt-idea-start-frame-input" type="file" accept="image/png,image/jpeg,image/webp">
+                <span class="field-hint">Geminiがこの画像を見てプロンプトを作成し、動画生成時にも開始フレームとして使います（8MB以内）。</span>
+              </label>
+              <div id="prompt-idea-start-frame-status" class="prompt-idea-start-frame-status" hidden>
+                <img id="prompt-idea-start-frame-preview" alt="">
+                <div><strong id="prompt-idea-start-frame-name"></strong><small>プロンプト作成と動画生成に使用中</small></div>
+                <button id="clear-prompt-idea-start-frame" type="button">外す</button>
+              </div>
+              <fieldset class="idea-mode-picker">
+                <legend>モード</legend>
+                <label><input type="radio" name="ideaMode" value="free" checked><span>自由発想</span></label>
+                <label><input type="radio" name="ideaMode" value="topic"><span>お題から作る</span></label>
+              </fieldset>
+              <label id="idea-topic-field" hidden>お題
+                <textarea name="ideaTopic" rows="3" maxlength="500" placeholder="例：終電後の無人駅で、雨に濡れた広告を見ている"></textarea>
+              </label>
+              <fieldset class="idea-mood-picker">
+                <legend>雰囲気（複数選択可）</legend>
+                <label><input type="checkbox" name="ideaMood" value="funny"><span>おもしろい</span></label>
+                <label><input type="checkbox" name="ideaMood" value="lonely"><span>さびしい</span></label>
+                <label><input type="checkbox" name="ideaMood" value="lovable"><span>愛おしい</span></label>
+                <label><input type="checkbox" name="ideaMood" value="uneasy"><span>不穏</span></label>
+                <label><input type="checkbox" name="ideaMood" value="surreal"><span>シュール</span></label>
+              </fieldset>
+              <button id="create-prompt-idea" type="button">プロンプト作成</button>
+              <p id="prompt-idea-status" class="field-hint" aria-live="polite">Geminiが英語の動画生成プロンプトを書き出します。生成後に自由に編集できます。</p>
+            </details>
+            <label id="prompt-label">どんな動画にしますか？
+              <textarea name="prompt" rows="5" required placeholder="例：明るい部屋でカメラを見て微笑み、右手をゆっくり振る。顔、髪型、衣装、配色を参照画像と一致させる。"></textarea>
+            </label>
+            <div class="prompt-draft-controls">
+              <button id="save-prompt-draft" type="button">下書きを保存</button>
+              <span id="prompt-draft-status" class="field-hint" aria-live="polite">このキャラクターの下書きは入力中に自動保存されます。</span>
+            </div>
+            <div class="form-grid primary-settings">
+              <label>生成方式
+                <select name="mode">
+                  <option value="image-to-video">Image to Video（選択画像を開始フレームに）</option>
+                  <option value="reference-to-video">Reference to Video（選択画像を参照に）</option>
+                  <option value="text-to-video">Text to Video（文章から動画を生成）</option>
+                  <option value="start-end-to-video">Start End to Video（開始・終了画像の間を生成）</option>
+                  <option value="digital-human">Lip Sync（静止画と自前音声で会話動画を生成）</option>
+                </select>
+              </label>
+              <label id="duration-field">長さ<select name="duration"></select></label>
+              <label id="aspect-ratio-field">画面比率<select name="aspectRatio"></select></label>
+              <label>解像度<select name="resolution"></select></label>
+              <label id="generated-audio-field" class="check"><input type="checkbox" name="audio" checked>対応サービスで音声・効果音を生成</label>
+              <label id="off-peak-field" class="check"><input type="checkbox" name="offPeak" checked>Viduはオフピークで節約</label>
+            </div>
+            <label id="digital-audio-field" class="start-image-field" hidden>話させる音声ファイル（必須）
+              <input id="digital-audio-input" name="digitalAudio" type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/ogg,audio/x-ms-wma,.mp3,.wav,.m4a,.aac,.ogg,.wma">
+              <span id="digital-audio-name" class="field-hint">MP3、WAV、M4A、AAC、OGG、WMA（15MB以内）。Cloudflare R2へ一時保存し、24時間後に削除します。</span>
+            </label>
+            <label id="start-image-field" class="start-image-field">開始フレームを別画像で上書き（任意）
+              <input id="start-image-input" name="startImage" type="file" accept="image/png,image/jpeg,image/webp">
+              <span id="start-image-name" class="field-hint">未選択なら、上で選んだ登録画像を使います。</span>
+            </label>
+            <div id="custom-start-status" class="custom-start-status" hidden>
+              <img id="custom-start-preview" alt="">
+              <div><span>CURRENT START FRAME</span><strong id="custom-start-file-name"></strong><small>この別画像が選択したサービスへ送信されます</small></div>
+              <button id="clear-start-image" type="button">登録画像に戻す</button>
+            </div>
+            <div id="end-frame-fields" hidden>
+              <details id="end-registered-selector" class="end-registered-selector">
+                <summary>終了フレームを登録画像から選択</summary>
+                <div id="end-registered-images" class="end-registered-images"></div>
+                <p id="end-registered-hint" class="field-hint">登録画像を1枚選択してください。</p>
+              </details>
+              <label id="end-image-field" class="start-image-field">終了フレームを別画像で上書き（任意）
+                <input id="end-image-input" name="endImage" type="file" accept="image/png,image/jpeg,image/webp">
+                <span id="end-image-name" class="field-hint">未選択なら、上で選んだ終了フレームの登録画像を使います。</span>
+              </label>
+            </div>
+            <div id="custom-end-status" class="custom-start-status" hidden>
+              <img id="custom-end-preview" alt="">
+              <div><span>END FRAME</span><strong id="custom-end-file-name"></strong><small>この画像を動画の最後のフレームとして送信します</small></div>
+              <button id="clear-end-image" type="button">終了画像を外す</button>
+            </div>
+            <details class="provider-selector">
+              <summary class="provider-selector-summary"><strong>生成サービスを選択</strong><small id="provider-selection-summary">選択中のサービスを確認</small></summary>
+              <p class="field-hint">複数選択すると、同じ画像・指示・共通設定で比較生成します。</p>
+              <div id="provider-picker" class="provider-picker"></div>
+            </details>
+            <details id="cost-dashboard" class="cost-dashboard">
+              <summary class="cost-dashboard-head">
+                <div>
+                  <span>APP COST TRACKER</span>
+                  <strong>API費用・利用上限</strong>
+                </div>
+                <div class="monthly-total">
+                  <span>今月の総費用（概算）</span>
+                  <output id="monthly-total-cost">$0.00（約¥0）</output>
+                </div>
+              </summary>
+              <div id="provider-cost-cards" class="provider-cost-cards"></div>
+              <p id="cost-dashboard-note" class="field-hint">本アプリから送信した動画生成とSeedream画像合成を集計します。</p>
+              <details id="cost-history" class="cost-history">
+                <summary>過去の月額費用を見る</summary>
+                <div id="cost-history-content" class="cost-history-content"></div>
+              </details>
+            </details>
+            <div class="cost-row">
+              <span id="format-summary">TikTok・Shorts向け 9:16</span>
+              <div><div id="cost-breakdown" class="cost-breakdown"></div><strong id="cost">概算 $0.00（約¥0）</strong></div>
+            </div>
+            <p id="provider-warning" class="provider-warning"></p>
+            <p id="generation-error" class="error"></p>
+            <button id="generate-button" class="primary" type="submit">動画を生成</button>
+          </form>
+        </div>
+      </section>
+    </section>
+    <section class="history-section">
+      <div class="section-head">
+        <div><span>STEP 3</span><h2>生成結果</h2></div>
+        <div class="history-toolbar">
+          <div class="history-view-toggle" aria-label="履歴の表示形式"><button id="show-history-list" type="button" aria-pressed="true">☰ リスト</button><button id="show-history-grid" type="button" aria-pressed="false">▦ グリッド</button></div><div class="history-filter" aria-label="履歴の表示範囲"><button id="show-all-history" type="button" aria-pressed="true">すべて</button><button id="show-favorites-history" type="button" aria-pressed="false">★ Favのみ</button><button id="show-non-favorites-history" type="button" aria-pressed="false">Fav以外</button></div>
+          <div class="history-delete-controls"><span id="history-selection-count">0件選択</span><button id="download-selected-history" class="download-selected-history" type="button" disabled>選択した動画をダウンロード</button><button id="concat-selected-history" class="concat-selected-history" type="button" disabled>選択した動画を結合</button><button id="delete-selected-history" type="button" disabled>選択した履歴を削除</button></div>
+        </div>
+      </div>
+      <nav id="history-pagination-top" class="history-pagination history-pagination-top" aria-label="生成履歴のページ移動（上）" hidden></nav>
+      <div id="history" class="history"><p class="muted">まだ動画は生成されていません。</p></div>
+      <nav id="history-pagination" class="history-pagination" aria-label="生成履歴のページ移動" hidden></nav>
+    </section>
+  </main>
+  <dialog id="character-dialog">
+    <form id="character-form" class="dialog-form">
+      <button type="button" class="close" id="close-dialog">×</button>
+      <h2>素材を追加</h2>
+      <label>種類<select name="type"><option value="character">キャラクター</option><option value="scene">背景・シーン素材</option></select></label>
+      <label>名前<input name="name" required maxlength="60" placeholder="例: komugi / rainy-city"></label>
+      <label>特徴・設定（任意）<textarea name="description" rows="4" maxlength="1000" placeholder="人物なら性格・衣装など、背景なら場所・時間帯・雰囲気・固定したい要素など"></textarea></label>
+      <p class="field-hint">背景、風景、複数人物の構図なども画像と一緒に登録できます。選んだ素材の設定だけを生成時に反映します。</p>
+      <p id="form-error" class="error"></p>
+      <button class="primary" type="submit">追加する</button>
+    </form>
+  </dialog>
+  <dialog id="extension-dialog">
+    <form id="extension-form" class="dialog-form">
+      <button type="button" class="close" id="close-extension-dialog">×</button>
+      <div>
+        <p id="extension-provider-label" class="step-label">VIDEO EXTENSION</p>
+        <h2 id="extension-dialog-title">続きを生成</h2>
+        <p id="extension-source-summary" class="extension-source-summary"></p>
+      </div>
+      <label>続きの内容（任意）
+        <textarea name="prompt" rows="4" maxlength="2000" placeholder="例：カメラ位置を維持したまま、人物が振っていた手を下ろして微笑む。"></textarea>
+      </label>
+      <div class="extension-settings">
+        <label>延長モデル
+          <select name="model"></select>
+        </label>
+        <label>追加時間
+          <select name="duration"></select>
+        </label>
+        <label>解像度
+          <select name="resolution"></select>
+        </label>
+      </div>
+      <label id="extension-final-frame-field">最後に到達させたい画像（任意）
+        <input name="finalFrameImage" type="file" accept="image/png,image/jpeg,image/webp">
+        <span class="field-hint">指定すると、その画像を延長後の終了フレームとして使用します。</span>
+      </label>
+      <div id="extension-final-frame-status" class="custom-start-status extension-final-frame-status" hidden>
+        <a id="extension-final-frame-open" href="#" target="_blank" rel="noopener" title="画像を開いて確認"><img id="extension-final-frame-preview" alt="延長時の最終フレームのプレビュー"></a>
+        <div><span>LAST FRAME PREVIEW</span><strong id="extension-final-frame-name"></strong><small>画像をクリックすると、別タブで拡大して確認できます。</small></div>
+        <button id="clear-extension-final-frame" type="button">画像を外す</button>
+      </div>
+      <p id="extension-provider-note" class="field-hint"></p>
+      <p id="extension-budget-note" class="extension-budget-note"></p>
+      <p class="field-hint">元動画と延長部分を含む新しい動画として、生成履歴へ追加します。</p>
+      <p id="extension-error" class="error"></p>
+      <button id="extend-submit-button" class="primary" type="submit">続きを生成</button>
+    </form>
+  </dialog>
+  <dialog id="generation-detail-dialog" class="generation-detail-dialog" aria-labelledby="generation-detail-title">
+    <button type="button" class="video-dialog-close" id="close-generation-detail-dialog" aria-label="閉じる" title="閉じる">×</button>
+    <div class="generation-detail-content">
+      <p class="step-label">GENERATION DETAILS</p>
+      <h2 id="generation-detail-title">生成設定</h2>
+      <h3>プロンプト</h3>
+      <p id="generation-detail-prompt" class="generation-detail-prompt"></p>
+      <div id="generation-detail-sent-prompt-section" hidden>
+        <h3>APIへ送信したプロンプト</h3>
+        <p id="generation-detail-sent-prompt" class="generation-detail-prompt"></p>
+      </div>
+      <div id="generation-detail-images" class="generation-detail-images"></div>
+      <dl id="generation-detail-settings" class="generation-detail-settings"></dl>
+    </div>
+  </dialog>
+  <dialog id="video-dialog" class="video-dialog" aria-label="動画を拡大表示">
+    <button type="button" class="video-dialog-close" id="close-video-dialog" aria-label="閉じる" title="閉じる">×</button>
+    <label class="video-dialog-loop"><input id="expanded-video-loop" type="checkbox"><span>↻ ループ再生</span></label>
+    <div class="video-dialog-info"><strong id="expanded-video-title"></strong><span id="expanded-video-meta"></span></div>
+    <video id="expanded-video" controls playsinline></video>
+  </dialog>
+  <input id="image-picker" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

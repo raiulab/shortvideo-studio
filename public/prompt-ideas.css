@@ -1,0 +1,250 @@
+.prompt-idea-panel {
+  margin: 0 0 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.prompt-idea-panel[open] {
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
+}
+
+.prompt-idea-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.prompt-idea-head::-webkit-details-marker { display: none; }
+
+.prompt-idea-head::after {
+  content: "⌄";
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.prompt-idea-panel[open] .prompt-idea-head::after { content: "⌃"; }
+
+.prompt-idea-head span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.prompt-idea-head h3 {
+  margin: 3px 0 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.prompt-idea-head small {
+  max-width: 48%;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.prompt-idea-panel[open] > :not(summary) {
+  margin-right: 14px;
+  margin-left: 14px;
+}
+
+.prompt-idea-panel[open] > .idea-mode-picker {
+  margin-top: 2px;
+  margin-bottom: 16px;
+}
+
+.prompt-idea-panel[open] > .prompt-idea-start-frame-field,
+.prompt-idea-panel[open] > .prompt-idea-start-frame-status {
+  margin-bottom: 16px;
+}
+
+.prompt-idea-panel[open] > #idea-topic-field {
+  margin-bottom: 16px;
+}
+
+.prompt-idea-panel[open] > .idea-mood-picker {
+  margin-bottom: 14px;
+}
+
+.prompt-idea-panel > .field-hint {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.prompt-idea-start-frame-field input {
+  cursor: pointer;
+}
+
+.prompt-idea-start-frame-status {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--soft));
+}
+
+.prompt-idea-start-frame-status img {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.prompt-idea-start-frame-status strong,
+.prompt-idea-start-frame-status small {
+  display: block;
+}
+
+.prompt-idea-start-frame-status strong {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prompt-idea-start-frame-status small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.prompt-idea-start-frame-status button {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prompt-idea-start-frame-status button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.idea-mode-picker,
+.idea-mood-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.idea-mode-picker legend,
+.idea-mood-picker legend {
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.idea-mode-picker label,
+.idea-mood-picker label {
+  display: block;
+  cursor: pointer;
+}
+
+.idea-mode-picker input,
+.idea-mood-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.idea-mode-picker span,
+.idea-mood-picker span {
+  display: block;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--soft));
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.idea-mode-picker input:checked + span,
+.idea-mood-picker input:checked + span {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+  background: var(--soft);
+  color: var(--accent);
+}
+
+.idea-mode-picker input:focus-visible + span,
+.idea-mood-picker input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#create-prompt-idea {
+  margin-top: 2px;
+  margin-bottom: 12px;
+  padding: 8px 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 58%, var(--line));
+  border-radius: 7px;
+  background: var(--panel);
+  color: var(--accent);
+  font-weight: 800;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+#create-prompt-idea:hover:not(:disabled) { background: var(--soft); }
+
+#create-prompt-idea:disabled {
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+#prompt-idea-status {
+  margin-top: 0;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+#prompt-idea-status.success {
+  color: #167240;
+}
+
+#prompt-idea-status.error {
+  color: #c93434;
+}
+
+@media (max-width: 560px) {
+  .prompt-idea-head { align-items: start; }
+  .prompt-idea-head small { max-width: 42%; }
+
+  .prompt-idea-start-frame-status {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .prompt-idea-start-frame-status button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

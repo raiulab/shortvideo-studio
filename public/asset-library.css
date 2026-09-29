@@ -1,0 +1,10 @@
+.asset-group-title {
+  margin: 12px 2px 2px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+.asset-group-title:first-child {
+  margin-top: 0;
+}
